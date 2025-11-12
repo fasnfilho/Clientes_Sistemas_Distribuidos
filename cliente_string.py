@@ -7,3 +7,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
 from datetime import datetime
 import hashlib
+
+SERVER_IP = "3.88.99.255"
+SERVER_PORT = 8080
+ENCODING = "utf-8"
+
