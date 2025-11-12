@@ -87,3 +87,10 @@ class ClienteJSONApp:
         self.text_logs = scrolledtext.ScrolledText(self.frame_logs, width=92, height=30, state="disabled", font=("Consolas", 10))
         self.text_logs.pack(padx=8, pady=8)
 
+    def log(self, msg: str):
+        ts = gerar_timestamp()
+        self.text_logs.config(state="normal")
+        self.text_logs.insert(tk.END, f"[{ts}] {msg}\n")
+        self.text_logs.config(state="disabled")
+        self.text_logs.yview(tk.END)
+
