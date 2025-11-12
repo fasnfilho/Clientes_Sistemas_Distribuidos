@@ -152,3 +152,140 @@ class ClienteJSONApp:
             else:
                 messagebox.showerror("Autenticação", f"Falha: resposta inesperada:\n{js}")
 
+    def enviar_operacao_json(self, operacao: str, dados: dict):
+        if not self.token:
+            messagebox.showwarning("Aviso", "Você precisa autenticar primeiro.")
+            return
+
+        # garante inclusão do token
+        dados_copy = dict(dados) if dados else {}
+        dados_copy["token"] = self.token
+
+        payload = {
+            "comando": "OP",
+            "dados": {
+                "operacao": operacao,
+                **dados_copy
+            },
+            "timestamp": gerar_timestamp()
+        }
+
+        try:
+            js = self.post_json(payload)
+        except Exception as exc:
+            messagebox.showerror("Erro", f"Falha na operação: {exc}")
+            return
+
+        # se houver status/erro, exibe
+        status = js.get("status") if isinstance(js, dict) else None
+        if status and status.upper() != "OK":
+            messagebox.showerror("Resposta", f"Erro: {js}")
+        else:
+            messagebox.showinfo(f"Resposta - {operacao}", json.dumps(js, ensure_ascii=False, indent=2))
+    def op_echo(self):
+        def enviar():
+            txt = entry.get().strip()
+            if not txt:
+                messagebox.showwarning("Echo", "Informe mensagem.")
+                return
+            dlg.destroy()
+            self.enviar_operacao_json("echo", {"mensagem": txt})
+
+        dlg = tk.Toplevel(self.root)
+        dlg.title("Echo")
+        ttk.Label(dlg, text="Mensagem:").pack(padx=8, pady=(10, 4))
+        entry = ttk.Entry(dlg, width=60)
+        entry.pack(padx=8, pady=(0, 10))
+        ttk.Button(dlg, text="Enviar", command=enviar).pack(pady=(0, 12))
+
+    def op_soma(self):
+        def enviar():
+            txt = entry.get().strip()
+            if not txt:
+                messagebox.showwarning("Soma", "Informe números separados por vírgula.")
+                return
+            dlg.destroy()
+            # converter em lista de números (float)
+            try:
+                nums = [float(x.strip()) for x in txt.split(",")]
+            except ValueError:
+                messagebox.showerror("Erro", "Digite apenas números separados por vírgula.")
+                return
+            # envia lista como lista JSON
+            self.enviar_operacao_json("soma", {"nums": nums})
+
+        dlg = tk.Toplevel(self.root)
+        dlg.title("Soma")
+        ttk.Label(dlg, text="Números separados por vírgula:").pack(padx=8, pady=(10, 4))
+        entry = ttk.Entry(dlg, width=50)
+        entry.pack(padx=8, pady=(0, 10))
+        ttk.Button(dlg, text="Enviar", command=enviar).pack(pady=(0, 12))
+
+    def op_timestamp(self):
+        # sem parâmetros
+        self.enviar_operacao_json("timestamp", {})
+
+    def op_status(self):
+        # pede detalhado ou não
+        def enviar():
+            val = var_det.get()
+            dlg.destroy()
+            if val:
+                self.enviar_operacao_json("status", {"detalhado": True})
+            else:
+                self.enviar_operacao_json("status", {})
+
+        dlg = tk.Toplevel(self.root)
+        dlg.title("Status")
+        var_det = tk.BooleanVar(value=False)
+        ttk.Label(dlg, text="Detalhado?").pack(padx=8, pady=(10, 4))
+        ttk.Checkbutton(dlg, text="Detalhado", variable=var_det).pack(padx=8, pady=(0, 10))
+        ttk.Button(dlg, text="Enviar", command=enviar).pack(pady=(0, 12))
+
+    def op_historico(self):
+        def enviar():
+            val = entry.get().strip()
+            dlg.destroy()
+            if val:
+                try:
+                    limite = int(val)
+                except ValueError:
+                    messagebox.showerror("Erro", "Informe um número inteiro para limite.")
+                    return
+                self.enviar_operacao_json("historico", {"limite": limite})
+            else:
+                self.enviar_operacao_json("historico", {})
+
+        dlg = tk.Toplevel(self.root)
+        dlg.title("Histórico")
+        ttk.Label(dlg, text="Limite (opcional):").pack(padx=8, pady=(10, 4))
+        entry = ttk.Entry(dlg, width=20)
+        entry.pack(padx=8, pady=(0, 10))
+        ttk.Button(dlg, text="Enviar", command=enviar).pack(pady=(0, 12))
+
+    def logout(self):
+        if not self.token:
+            messagebox.showinfo("Logout", "Nenhuma sessão ativa.")
+            return
+
+        payload = {
+            "comando": "LOGOUT",
+            "dados": {"token": self.token},
+            "timestamp": gerar_timestamp()
+        }
+        try:
+            js = self.post_json(payload)
+            messagebox.showinfo("Logout", f"Resposta: {json.dumps(js, ensure_ascii=False)}")
+        except Exception as exc:
+            messagebox.showerror("Logout", f"Erro no logout: {exc}")
+        finally:
+            self.token = None
+            self.log("Token limpo / sessão finalizada.")
+
+def main():
+    root = tk.Tk()
+    app = ClienteJSONApp(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
