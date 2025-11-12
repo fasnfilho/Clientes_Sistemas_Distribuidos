@@ -94,3 +94,29 @@ class ClienteJSONApp:
         self.text_logs.config(state="disabled")
         self.text_logs.yview(tk.END)
 
+    def post_json(self, payload: dict) -> dict:
+        try:
+            body = json.dumps(payload)
+            headers = {
+                "Content-Type": "application/json",
+                "Content-Length": str(len(body.encode("utf-8")))
+            }
+
+            conn = http.client.HTTPConnection(SERVER_IP, SERVER_PORT, timeout=TIMEOUT)
+            self.log(f"->{body}")
+            conn.request("POST", "/", body, headers)
+            resp = conn.getresponse()
+            text = resp.read().decode("utf-8", errors="replace")
+            conn.close()
+
+            try:
+                js = json.loads(text)
+                self.log(f"<-{json.dumps(js, ensure_ascii=False)}")
+                return js
+            except json.JSONDecodeError:
+                self.log(f"Resposta (texto): {text}")
+                raise RuntimeError("Resposta não é JSON válido")
+        except Exception as e:
+            self.log(f"Erro HTTP: {e}")
+            raise
+
