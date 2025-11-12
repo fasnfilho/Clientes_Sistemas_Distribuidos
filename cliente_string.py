@@ -12,3 +12,17 @@ SERVER_IP = "3.88.99.255"
 SERVER_PORT = 8080
 ENCODING = "utf-8"
 
+class ClienteStringsApp:
+
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Cliente Strings")
+        self.root.geometry("750x600")
+        self.root.resizable(False, False)
+
+        self.sock = None
+        self.token = None
+        self.matricula = "538521"
+
+        self.criar_interface()
+    
