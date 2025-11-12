@@ -120,3 +120,35 @@ class ClienteJSONApp:
             self.log(f"Erro HTTP: {e}")
             raise
 
+    def autenticar(self):
+        matricula = self.entry_matricula.get().strip()
+        if not matricula:
+            messagebox.showwarning("Matrícula", "Informe a matrícula antes de autenticar.")
+            return
+
+        payload = {
+            "comando": "AUTH",
+            "dados": {
+                "aluno_id": matricula
+            },
+            "timestamp": gerar_timestamp()
+        }
+
+        try:
+            js = self.post_json(payload)
+        except Exception as exc:
+            messagebox.showerror("Erro", f"Falha no AUTH: {exc}")
+            return
+
+        # extrair token
+        token = extrair_token_resposta_json(js)
+        if token:
+            self.token = token
+            messagebox.showinfo("Autenticação", "Autenticação realizada com sucesso.")
+            self.log(f"Token recebido: {token}")
+        else:
+            if isinstance(js, dict) and js.get("status", "").upper() == "OK":
+                messagebox.showinfo("Autenticação", "Autenticado (OK), mas token não foi encontrado.")
+            else:
+                messagebox.showerror("Autenticação", f"Falha: resposta inesperada:\n{js}")
+
