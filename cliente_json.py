@@ -1,0 +1,10 @@
+#Cliente JSON - Sistemas Distribuídos
+#HTTP POST -> http://3.88.99.255:8081/
+
+import tkinter as tk
+from tkinter import ttk, messagebox, scrolledtext
+from datetime import datetime
+from typing import Optional, Any, Dict
+import http.client
+import json
+

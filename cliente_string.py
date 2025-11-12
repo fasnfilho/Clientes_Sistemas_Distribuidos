@@ -11,6 +11,7 @@ import hashlib
 SERVER_IP = "3.88.99.255"
 SERVER_PORT = 8080
 ENCODING = "utf-8"
+TIMEOUT = 6
 
 def extrair_token_da_resposta(resposta: str):
     if not resposta:
