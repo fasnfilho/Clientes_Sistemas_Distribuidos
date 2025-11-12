@@ -79,3 +79,41 @@ class ClienteStringsApp:
         self.text_logs = scrolledtext.ScrolledText(self.frame_logs, width=85, height=30, state="disabled")
         self.text_logs.pack(padx=10, pady=10)
 
+    def log(self, msg):
+        self.text_logs.config(state="normal")
+        self.text_logs.insert(tk.END, f"[{gerar_timestamp()}] {msg}\n")
+        self.text_logs.config(state="disabled")
+        self.text_logs.yview(tk.END)
+    
+    def conectar(self):
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect((SERVER_IP, SERVER_PORT))
+            self.log(f"Conectado a {SERVER_IP}:{SERVER_PORT}")
+            return sock
+        except Exception as e:
+            messagebox.showerror("Erro", f"Falha ao conectar: {e}")
+            self.log(f"Erro de conexão: {e}")
+            return None
+    
+    def autenticar(self):
+        self.sock = self.conectar()
+        if not self.sock:
+            return
+        matricula = self.entry_matricula.get().strip()
+        msg = f"AUTH|aluno_id={matricula}|timestamp={gerar_timestamp()}|FIM"
+        self.log(f"->{msg}")
+        try:
+            resposta = enviar_mensagem(self.sock, msg)
+            self.log(f"<-{resposta}")
+            token = extrair_token_da_resposta(resposta)
+            if "OK" in resposta or "token" in resposta.lower():
+                self.token = token
+                messagebox.showinfo("Autenticação", "Autenticação realizada com sucesso!")
+                self.log(f"Token recebido: {token}")
+            else:
+                messagebox.showerror("Falha", f"Resposta inesperada: {resposta}")
+        except Exception as e:
+            messagebox.showerror("Erro", str(e))
+            self.log(f"Erro na autenticação: {e}")
+    
