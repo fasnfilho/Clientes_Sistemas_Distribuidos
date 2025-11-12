@@ -12,6 +12,26 @@ SERVER_IP = "3.88.99.255"
 SERVER_PORT = 8080
 ENCODING = "utf-8"
 
+def extrair_token_da_resposta(resposta: str):
+    if not resposta:
+        return None
+    for parte in resposta.split("|"):
+        if parte.startswith("token="):
+            return parte.split("=", 1)[1]
+    return None
+
+
+def gerar_timestamp():
+    return datetime.now().isoformat(timespec="seconds")
+
+def enviar_mensagem(sock, mensagem):
+    sock.sendall((mensagem + '\n').encode(ENCODING))
+    resposta = sock.recv(4096).decode(ENCODING)
+    return resposta.strip()
+
+def md5_hash(texto):
+    return hashlib.md5(texto.encode()).hexdigest()
+
 class ClienteStringsApp:
 
     def __init__(self, root):
