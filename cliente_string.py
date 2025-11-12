@@ -135,3 +135,49 @@ class ClienteStringsApp:
             self.log(f"Erro na operação {comando}: {e}")
             messagebox.showerror("Erro", str(e))
     
+    def op_echo(self):
+        top = tk.Toplevel(self.root)
+        top.title("Echo")
+        tk.Label(top, text="Mensagem:").pack(pady=5)
+        entrada = tk.Entry(top, width=50)
+        entrada.pack(pady=5)
+        tk.Button(top, text="Enviar", command=lambda: [self.enviar_operacao("echo", f"mensagem={entrada.get()}"), top.destroy()]).pack(pady=10)
+    
+    def op_soma(self):
+        top = tk.Toplevel(self.root)
+        top.title("Soma")
+        tk.Label(top, text="Números separados por vírgula:").pack(pady=5)
+        entrada = tk.Entry(top, width=50)
+        entrada.pack(pady=5)
+        tk.Button(top, text="Enviar", command=lambda: [self.enviar_operacao("soma", f"nums={entrada.get()}"), top.destroy()]).pack(pady=10)
+
+    def op_timestamp(self):
+        self.enviar_operacao("timestamp")
+    
+    def op_status(self):
+        self.enviar_operacao("status", "detalhado=True")
+
+    def op_historico(self):
+        self.enviar_operacao("historico", "limite=5")
+
+    def op_logout(self):
+        if not self.sock or not self.token:
+            messagebox.showinfo("Logout", "Nenhuma sessão ativa.")
+            return
+        msg = f"LOGOUT|token={self.token}|timestamp={gerar_timestamp()}|FIM"
+        self.log(f"->{msg}")
+        try:
+            resposta = enviar_mensagem(self.sock, msg)
+            self.log(f"<-{resposta}")
+            messagebox.showinfo("Logout", "Sessão encerrada.")
+        except Exception as e:
+            self.log(f"Erro no logout: {e}")
+        finally:
+            self.sock.close()
+            self.sock = None
+            self.token = None
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ClienteStringsApp(root)
+    root.mainloop()
