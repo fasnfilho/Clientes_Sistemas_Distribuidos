@@ -117,3 +117,21 @@ class ClienteStringsApp:
             messagebox.showerror("Erro", str(e))
             self.log(f"Erro na autenticação: {e}")
     
+    def enviar_operacao(self, comando, parametros=""):
+        if not self.sock or not self.token:
+            messagebox.showwarning("Aviso", "Você precisa se autenticar primeiro.")
+            return
+        if parametros:
+            msg = f"OP|operacao={comando}|{parametros}|token={self.token}|timestamp={gerar_timestamp()}|FIM"
+        else:
+            msg = f"OP|operacao={comando}|token={self.token}|timestamp={gerar_timestamp()}|FIM"
+ 
+        self.log(f"->{msg}")
+        try:
+            resposta = enviar_mensagem(self.sock, msg)
+            self.log(f"<-{resposta}")
+            messagebox.showinfo("Resposta do servidor", resposta)
+        except Exception as e:
+            self.log(f"Erro na operação {comando}: {e}")
+            messagebox.showerror("Erro", str(e))
+    
