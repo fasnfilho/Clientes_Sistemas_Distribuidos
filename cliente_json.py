@@ -8,3 +8,7 @@ from typing import Optional, Any, Dict
 import http.client
 import json
 
+SERVER_IP = "3.88.99.255"
+SERVER_PORT = 8081
+TIMEOUT = 6  # segundos
+
