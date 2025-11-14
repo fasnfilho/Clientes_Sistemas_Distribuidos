@@ -1,0 +1,146 @@
+// Definição do protocolo usando Protocol Buffers
+// Demonstra serialização binária eficiente para sistemas distribuídos
+
+syntax = "proto3";
+
+package servidor_validacao;
+
+// Mensagem base para requisições
+message Requisicao {
+  oneof tipo {
+    ComandoAuth auth = 1;
+    ComandoOperacao operacao = 2;
+    ComandoInfo info = 3;
+    ComandoLogout logout = 4;
+  }
+}
+
+// Mensagem base para respostas
+message Resposta {
+  oneof tipo {
+    RespostaOk ok = 1;
+    RespostaErro erro = 2;
+  }
+}
+
+// Comando de autenticação
+message ComandoAuth {
+  string aluno_id = 1;
+  string timestamp_cliente = 2;
+}
+
+// Comando de operação
+message ComandoOperacao {
+  string token = 1;
+  string operacao = 2;
+  map<string, string> parametros = 3;
+}
+
+// Comando de informação
+message ComandoInfo {
+  string tipo = 1; // "basico", "operacoes", "estatisticas"
+}
+
+// Comando de logout
+message ComandoLogout {
+  string token = 1;
+}
+
+// Resposta de sucesso
+message RespostaOk {
+  string comando = 1;
+  map<string, string> dados = 2;
+  string timestamp = 3;
+}
+
+// Resposta de erro
+message RespostaErro {
+  string comando = 1;
+  string mensagem = 2;
+  string timestamp = 3;
+  map<string, string> detalhes = 4;
+}
+
+// Estruturas de dados específicas
+
+// Dados de autenticação bem-sucedida
+message DadosAuth {
+  string token = 1;
+  string nome = 2;
+  string matricula = 3;
+  string timestamp = 4;
+  int64 timeout_segundos = 5;
+}
+
+// Resultado de operação Echo
+message ResultadoEcho {
+  string mensagem_original = 1;
+  string mensagem_eco = 2;
+  string hash_md5 = 3;
+  int32 tamanho_mensagem = 4;
+  string timestamp_servidor = 5;
+}
+
+// Resultado de operação Soma
+message ResultadoSoma {
+  repeated double numeros_originais = 1;
+  int32 quantidade = 2;
+  double soma = 3;
+  double media = 4;
+  double maximo = 5;
+  double minimo = 6;
+  string timestamp_calculo = 7;
+}
+
+// Resultado de operação Timestamp
+message ResultadoTimestamp {
+  double timestamp_unix = 1;
+  string timestamp_iso = 2;
+  string timestamp_formatado = 3;
+  int32 ano = 4;
+  int32 mes = 5;
+  int32 dia = 6;
+  int32 hora = 7;
+  int32 minuto = 8;
+  int32 segundo = 9;
+  int32 microsegundo = 10;
+}
+
+// Status do servidor
+message StatusServidor {
+  string status = 1;
+  int64 operacoes_processadas = 2;
+  int32 sessoes_ativas = 3;
+  double tempo_ativo = 4;
+  string versao = 5;
+  map<string, string> estatisticas_banco = 6;
+  map<string, string> sessoes_detalhes = 7;
+  map<string, double> metricas = 8;
+}
+
+// Informações do servidor
+message InfoServidor {
+  string nome = 1;
+  string versao = 2;
+  string host = 3;
+  int32 port = 4;
+  string protocolo = 5;
+  string formato = 6;
+  repeated string operacoes_disponiveis = 7;
+  int32 total_operacoes = 8;
+}
+
+// Histórico de operações
+message HistoricoOperacao {
+  string operacao = 1;
+  map<string, string> parametros = 2;
+  map<string, string> resultado = 3;
+  string timestamp = 4;
+  bool sucesso = 5;
+}
+
+message HistoricoAluno {
+  string aluno_id = 1;
+  repeated HistoricoOperacao operacoes = 2;
+  int32 total = 3;
+}
